@@ -6,7 +6,7 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 client.login(process.env.BOTTOKEN);
-const prefix = '>'
+var prefix = '>'
 
 
 //ytdl
@@ -36,7 +36,7 @@ client.on("message", async message => {
     if (message.content.startsWith(`${prefix}play`)) {
         execute(message, serverQueue);
         return;
-    } 
+    }
     else if (message.content.startsWith(`${prefix}skip`)) {
         skip(message, serverQueue);
         return;
@@ -45,16 +45,36 @@ client.on("message", async message => {
         stop(message, serverQueue);
         return;
     }
+    else if (message.content.startsWith(`${prefix}clear`)) {
+        clear(message, serverQueue);
+        return;
+    }
     else if (message.content.startsWith(`${prefix}doughnut`) || message.content.startsWith(`${prefix}donut`)) {
         reply(message);
         return;
     }
-    else if (message.content.startsWith(`${prefix}bagel`)) {
+    else if (message.content.startsWith(`${prefix}song`)) {
+        song(message, serverQueue);
+        return;
+    }
+    else if (message.content.startsWith(`${prefix}ploy`)) {
         easteregg(message);
         return;
     }
+    else if (message.content.startsWith(`${prefix}help`)) {
+        help(message);
+        return;
+    }
+    else if (message.content.startsWith(`${prefix}queue`)) {
+        checkQueue(message, serverQueue);
+        return;
+    }
+    else if (message.content.startsWith(`${prefix}set`)) {
+        setting(message);
+        return;
+    }
     else {
-        message.channel.send("🤷Doughnut do not understand at all!🤷");
+        message.channel.send("🍩Doughnut do not understand at all! Try use >help.");
     }
   });
   
@@ -64,12 +84,12 @@ async function execute(message, serverQueue) {
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel)
         return message.channel.send(
-            "👻Doughnut do not see you in Voice Channel.👻"
+            "🍩Doughnut do not see you in Voice Channel."
         );
     const permissions = voiceChannel.permissionsFor(message.client.user);
     if (!permissions.has("CONNECT") || !permissions.has("SPEAK")) {
         return message.channel.send(
-            "🐤Doughnut cannot do anything!🐤"
+            "🍩Doughnut cannot do anything!"
         );
     }
   
@@ -94,6 +114,7 @@ async function execute(message, serverQueue) {
         queueContruct.songs.push(song);
   
     try {
+        message.channel.send('Doughnut!')
         var connection = await voiceChannel.join();
         queueContruct.connection = connection;
         play(message.guild, queueContruct.songs[0]);
@@ -106,28 +127,28 @@ async function execute(message, serverQueue) {
     } 
     else {
       serverQueue.songs.push(song);
-      return message.channel.send(`Doughnut add ${song.title} to your queue!🚦`);
+      return message.channel.send(`Doughnut add <**${song.title}**> to your queue!`);
     }
   }
   
 function skip(message, serverQueue) {
     if (!message.member.voice.channel)
         return message.channel.send(
-            "👻Doughnut do not see you in Voice Channel.👻"
+            "🍩Doughnut do not see you in Voice Channel."
         );
     if (!serverQueue)
-        return message.channel.send("No song left! 💬");
+        return message.channel.send("🍩No song left!");
     serverQueue.connection.dispatcher.end();
 }
   
 function stop(message, serverQueue) {
     if (!message.member.voice.channel)
         return message.channel.send(
-            "👻Doughnut do not see you in Voice Channel.👻"
+            "🍩Doughnut do not see you in Voice Channel."
         );
       
     if (!serverQueue)
-        return message.channel.send("No song left! 💬");
+        return message.channel.send("🍩No song left!");
       
     serverQueue.songs = [];
     serverQueue.connection.dispatcher.end();
@@ -136,31 +157,83 @@ function stop(message, serverQueue) {
 function play(guild, song) {
     const serverQueue = queue.get(guild.id);
     if (!song) {
-        serverQueue.voiceChannel.leave();
-        queue.delete(guild.id);
-        return;
+        setTimeout(() => {
+            serverQueue.voiceChannel.leave();
+            queue.delete(guild.id);
+            return;
+        },3000)
     }
-  
-    const dispatcher = serverQueue.connection
-        .play(ytdl(song.url))
-        .on("finish", () => {
-            serverQueue.songs.shift();
-            play(guild, serverQueue.songs[0]);
-        })
-        .on("error", error => console.error(error));
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-    serverQueue.textChannel.send(`🎵Doughnut is singing ${song.title}. 🎵`);
+    else{
+        const dispatcher = serverQueue.connection
+            .play(ytdl(song.url))
+            .on("finish", () => {
+                serverQueue.songs.shift();
+                play(guild, serverQueue.songs[0]);
+            })
+            .on("error", error => console.error(error));
+        dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+        serverQueue.textChannel.send(`Doughnut is singing <**${song.title}**>.`);
+    }
   }
 
 
 function reply(message){
-    message.channel.send(
-        "Yummy!🍩 Stay Comfy!"
+    message.reply(
+        "🍩Yummy! Stay Comfy!"
     )
 }
 
 function easteregg(message){
     message.channel.send(
-        "That's a bagel🥯, not doughnut!"
+        "🍨Happy Birthday!!!"
+    )
+}
+
+function song(message, serverQueue){
+    const current = serverQueue.songs[0]
+    message.channel.send(`This song is <**${current.title}**>.`)
+}
+
+function checkQueue(message,serverQueue){
+    var text = '**Queue**\n'
+    for(let i = 0;i < serverQueue.songs.length;i++){
+        if(i === 0){
+            text += `**Now Playing**: <**${serverQueue.songs[i].title}**>\n`
+        }
+        else{
+            text += `**${i}**: <**${serverQueue.songs[i].title}**>\n`
+        }
+    }
+    message.channel.send(text)
+
+}
+
+function clear(message, serverQueue){
+    serverQueue.songs = [serverQueue.songs.shift()]
+    message.channel.send(`Doughnut cleared every songs!`)
+}
+
+function setting(message){
+    const content = message.content.split(" ")
+    if(content[1] == 'prefix'){
+        prefix = content[2]
+        message.channel.send(`Doughnut has changed the prefix to ${prefix}!`)
+        return
+    }
+
+}
+
+function help(message){
+    message.channel.send(
+        `Doughnut current prefix is '**${prefix}**'
+        **${prefix}play** <*url*>: Play music
+        **${prefix}skip**: Skip music
+        **${prefix}stop**: Stop music
+        **${prefix}clear**: Clear queue
+        **${prefix}song**: Show current music
+        **${prefix}queue**: Show current queue
+        **${prefix}set** <*setting*> <*args..*>: settings
+            |   **${prefix}set** prefix <*new prefix*>: setting, change prefix
+        **${prefix}doughnut**: Response Doughtnut!`
     )
 }
