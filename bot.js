@@ -234,6 +234,6 @@ function help(message){
         **${prefix}queue**: Show current queue
         **${prefix}set** <*setting*> <*args..*>: settings
             |   **${prefix}set** prefix <*new prefix*>: setting, change prefix
-        **${prefix}doughnut**: Response Doughtnut!`
+        **${prefix}doughnut**: Response Doughnut!`
     )
 }
