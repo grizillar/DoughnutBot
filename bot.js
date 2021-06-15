@@ -248,6 +248,6 @@ function help(message){
             |   **${prefix}set** prefix <*new prefix*>: Setting, change prefix
             |   **${prefix}set** version: Settings, show current version
             |   **${prefix}set** git: Settings, show source code
-        **${prefix}doughnut**: Response Doughtnut!`
+        **${prefix}doughnut**: Response Doughnut!`
     )
 }
