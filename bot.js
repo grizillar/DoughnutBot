@@ -6,7 +6,6 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 client.login(process.env.BOTTOKEN);
-var prefix = '>'
 
 
 //ytdl
@@ -14,6 +13,11 @@ const ytdl = require('ytdl-core')
 
 //vars
 const queue = new Map()
+var prefix = '>'
+const doughnut = {
+    name:'Doughnut Bot',
+    version:'1.0.0'
+}
 
 client.once("ready", () => {
     console.log("Boop! Boop!");
@@ -220,6 +224,14 @@ function setting(message){
         message.channel.send(`Doughnut has changed the prefix to ${prefix}!`)
         return
     }
+    if(content[1] == 'version'){
+        message.channel.send(`${doughnut.name} version: *${doughnut.version}*`)
+        return
+    }
+    if(content[1] == 'git'){
+        message.channel.send('All Code: https://github.com/grizillar/doughnutBot')
+        return
+    }
 
 }
 
@@ -233,7 +245,9 @@ function help(message){
         **${prefix}song**: Show current music
         **${prefix}queue**: Show current queue
         **${prefix}set** <*setting*> <*args..*>: settings
-            |   **${prefix}set** prefix <*new prefix*>: setting, change prefix
+            |   **${prefix}set** prefix <*new prefix*>: Setting, change prefix
+            |   **${prefix}set** version: Settings, show current version
+            |   **${prefix}set** git: Settings, show source code
         **${prefix}doughnut**: Response Doughtnut!`
     )
 }
